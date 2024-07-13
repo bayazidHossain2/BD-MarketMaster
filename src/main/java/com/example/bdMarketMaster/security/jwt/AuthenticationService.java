@@ -17,8 +17,8 @@ public class AuthenticationService {
         this.authenticationManager = authenticationManager;
     }
 
-    public Authentication authenticate(String username, String password) throws AuthenticationException {
-        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+    public Authentication authenticate(String identity, String password) throws AuthenticationException {
+        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(identity, password);
         return authenticationManager.authenticate(authenticationToken);
     }
 }

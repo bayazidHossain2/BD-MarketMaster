@@ -43,18 +43,12 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, DefaultAuthenticationEventPublisher authenticationEventPublisher) throws Exception {
-        http.authorizeRequests(authorizeRequests -> authorizeRequests.requestMatchers("/auth/**")
+        http.authorizeRequests(authorizeRequests -> authorizeRequests.requestMatchers("/public/**")
                 .permitAll().anyRequest().authenticated());
-//        http.authorizeHttpRequests((requests) -> requests
-//                .requestMatchers("/auth/**").permitAll()
-//                .anyRequest().authenticated());
         http.sessionManagement(session -> session.
                 sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
-        //        http.formLogin(withDefaults());
-//        http.httpBasic(withDefaults());
-//        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         http.csrf(AbstractHttpConfigurer::disable);
@@ -75,9 +69,6 @@ public class SecurityConfig {
                 .build();
 
         JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-//        userDetailsManager.createUser(user1);
-//        userDetailsManager.createUser(admin);
-
         try {
             if (!userDetailsManager.userExists(user1.getUsername())) {
                 userDetailsManager.createUser(user1);
@@ -89,7 +80,6 @@ public class SecurityConfig {
             // Handle exception if any
         }
         return userDetailsManager;
-//        return new InMemoryUserDetailsManager(user1, admin);
     }
 
     @Bean
