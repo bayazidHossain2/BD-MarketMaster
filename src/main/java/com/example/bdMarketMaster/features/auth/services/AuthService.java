@@ -1,7 +1,11 @@
 package com.example.bdMarketMaster.features.auth.services;
 
 import com.example.bdMarketMaster.features.auth.dao.AuthDAO;
+import com.example.bdMarketMaster.features.auth.dao.VarificationTokenDAO;
+import com.example.bdMarketMaster.features.mail.MailService;
 import com.example.bdMarketMaster.models.UserModel;
+import com.example.bdMarketMaster.models.VerificationToken;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,16 @@ public class AuthService {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private VerificationTokenService verificationTokenService;
+
+    @Autowired
+    private VarificationTokenDAO varificationTokenDAO;
+
+
 
     public ResponseEntity<?> signup(UserModel userModel) {
         try {
@@ -43,13 +57,28 @@ public class AuthService {
             if (!userDetailsManager.userExists(userDetails.getUsername())) {
                 userDetailsManager.createUser(userDetails);
             }
-            return new ResponseEntity<>(HttpStatus.CREATED);
+//
+
+            // Create verification token
+            VerificationToken token = verificationTokenService.createVerificationToken(userModel);
+
+            // Send verification email
+            String verificationUrl = "http://localhost:8080/public/verify/" + token.getToken();
+
+            try {
+                mailService.sendWelcomeEmail(userModel.getEmail(), userModel.getUsername(), verificationUrl);
+            } catch (Exception e) {
+                return new ResponseEntity<>("Error sending verification email", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>("User registered successfully. Please check your email to verify your account.", HttpStatus.OK);
+//            return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (DataIntegrityViolationException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
         catch (Exception e){
             e.printStackTrace();
-            return new ResponseEntity<>("This credential already exists. If you forget password goto recover password.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("This credential already exists. If you forget password goto recover password." + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
