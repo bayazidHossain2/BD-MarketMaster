@@ -1,5 +1,7 @@
 package com.example.bdMarketMaster.security;
 
+import com.example.bdMarketMaster.features.auth.dao.AuthDAO;
+import com.example.bdMarketMaster.models.UserModel;
 import com.example.bdMarketMaster.security.jwt.AuthEntryPointJwt;
 import com.example.bdMarketMaster.security.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class SecurityConfig {
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
+    @Autowired
+    private AuthDAO authDAO;
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return  new AuthTokenFilter();
@@ -44,7 +49,8 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, DefaultAuthenticationEventPublisher authenticationEventPublisher) throws Exception {
         http.authorizeRequests(authorizeRequests -> authorizeRequests.requestMatchers("/public/**")
-                .permitAll().anyRequest().authenticated());
+                .permitAll().requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated());
         http.sessionManagement(session -> session.
                 sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -67,7 +73,19 @@ public class SecurityConfig {
                 .password(passwordEncoder().encode("asdfgh1"))
                 .roles("ADMIN")
                 .build();
-
+        UserModel userModel = new UserModel();
+        userModel.setUsername("admin");
+        userModel.setPassword("asdfgh1");
+        userModel.setDob("01/01/2000");
+        userModel.setEmail("admin@example.com");
+        userModel.setIdentity("admin");
+        userModel.setPhoneNumber("01000000000");
+        userModel.setVerifyTryCount(-1);
+        try{
+            authDAO.save(userModel);
+        }catch (Exception e){
+//            e.printStackTrace();
+        }
         JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
         try {
             if (!userDetailsManager.userExists(user1.getUsername())) {

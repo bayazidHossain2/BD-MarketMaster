@@ -5,7 +5,6 @@ import com.example.bdMarketMaster.features.auth.services.AuthService;
 import com.example.bdMarketMaster.features.auth.services.VerificationTokenService;
 import com.example.bdMarketMaster.features.mail.MailService;
 import com.example.bdMarketMaster.models.UserModel;
-import com.example.bdMarketMaster.models.VerificationToken;
 import com.example.bdMarketMaster.models.helper.LoginRequest;
 import com.example.bdMarketMaster.models.helper.LoginResponse;
 import com.example.bdMarketMaster.security.jwt.AuthenticationService;
@@ -14,8 +13,6 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,11 +39,6 @@ public class AuthController {
 
     @Autowired
     private VerificationTokenService verificationTokenService;
-    @Autowired
-    private VarificationTokenDAO varificationTokenDAO;
-
-//    @Autowired
-//    private MailService mailService;
 
     @PostMapping("signup")
     public ResponseEntity<?> signupUser(@RequestBody UserModel userModel) {
@@ -97,13 +88,13 @@ public class AuthController {
         return new ResponseEntity<>(getVerificationMessage(true, ""), HttpStatus.OK);
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<?> getUserFF(){
-        return new ResponseEntity<>(
-                ""
-                , HttpStatus.OK);
-//        return new ResponseEntity<>(varificationTokenDAO.findAll(), HttpStatus.OK);
-    }
+//    @GetMapping("/id")
+//    public ResponseEntity<?> getUserFF(){
+//        return new ResponseEntity<>(
+//                ""
+//                , HttpStatus.OK);
+////        return new ResponseEntity<>(varificationTokenDAO.findAll(), HttpStatus.OK);
+//    }
 
     String getVerificationMessage(boolean isVerify, String message){
         if(isVerify){
